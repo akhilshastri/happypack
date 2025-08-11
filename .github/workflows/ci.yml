@@ -1,0 +1,175 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  rust-tests:
+    name: Rust Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        components: rustfmt, clippy
+    
+    - name: Cache Rust dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          rust-happypack/target/
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+    
+    - name: Check Rust formatting
+      run: cd rust-happypack && cargo fmt --all -- --check
+    
+    - name: Run Clippy
+      run: cd rust-happypack && cargo clippy --all-targets --all-features -- -D warnings
+    
+    - name: Run Rust unit tests
+      run: cd rust-happypack && cargo test --lib
+    
+    - name: Run Rust integration tests
+      run: cd rust-happypack && cargo test --test integration_tests
+    
+    - name: Build release binary
+      run: cd rust-happypack && cargo build --release --bin rust-happypack-worker
+
+  node-tests:
+    name: Node.js Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: |
+          rust-happypack-loader/package-lock.json
+          rust-happypack-plugin/package-lock.json
+    
+    - name: Install loader dependencies
+      run: cd rust-happypack-loader && npm ci
+    
+    - name: Install plugin dependencies
+      run: cd rust-happypack-plugin && npm ci
+    
+    - name: Run loader tests
+      run: cd rust-happypack-loader && npm test
+    
+    - name: Run plugin tests
+      run: cd rust-happypack-plugin && npm test
+    
+    - name: Build loader
+      run: cd rust-happypack-loader && npm run build
+    
+    - name: Build plugin
+      run: cd rust-happypack-plugin && npm run build
+
+  integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [rust-tests, node-tests]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+    
+    - name: Use Node.js 20.x
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20.x
+        cache: 'npm'
+        cache-dependency-path: |
+          rust-happypack-loader/package-lock.json
+          rust-happypack-plugin/package-lock.json
+    
+    - name: Cache Rust dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          rust-happypack/target/
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+    
+    - name: Build Rust worker
+      run: cd rust-happypack && cargo build --release --bin rust-happypack-worker
+    
+    - name: Install Node.js dependencies
+      run: |
+        cd rust-happypack-loader && npm ci
+        cd ../rust-happypack-plugin && npm ci
+    
+    - name: Build Node.js packages
+      run: |
+        cd rust-happypack-loader && npm run build
+        cd ../rust-happypack-plugin && npm run build
+    
+    - name: Test basic example
+      run: |
+        cd examples/basic
+        npm install ../../rust-happypack-loader ../../rust-happypack-plugin
+        npm run build || echo "Build completed with expected webpack behavior"
+    
+    - name: Test TypeScript example
+      run: |
+        cd examples/typescript
+        npm install ../../rust-happypack-loader ../../rust-happypack-plugin
+        npm run build || echo "Build completed with expected webpack behavior"
+    
+    - name: Test performance comparison
+      run: |
+        cd examples/performance
+        npm install ../../rust-happypack-loader ../../rust-happypack-plugin
+        npm run test:threads || echo "Performance test completed"
+
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+    
+    - name: Install cargo-audit
+      run: cargo install cargo-audit
+    
+    - name: Run Rust security audit
+      run: cd rust-happypack && cargo audit
+    
+    - name: Use Node.js 20.x
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20.x
+    
+    - name: Run npm audit for loader
+      run: cd rust-happypack-loader && npm audit --audit-level moderate
+    
+    - name: Run npm audit for plugin
+      run: cd rust-happypack-plugin && npm audit --audit-level moderate

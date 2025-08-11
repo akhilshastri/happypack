@@ -1,0 +1,55 @@
+{
+  "name": "rust-happypack-plugin",
+  "version": "0.1.0",
+  "description": "Webpack plugin for managing Rust-based parallel transpiler workers",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "webpack",
+    "plugin",
+    "transpiler",
+    "rust",
+    "parallel",
+    "typescript",
+    "javascript",
+    "jsx",
+    "tsx"
+  ],
+  "author": "Devin AI <devin-ai-integration[bot]@users.noreply.github.com>",
+  "license": "MIT",
+  "peerDependencies": {
+    "webpack": "^4.0.0 || ^5.0.0"
+  },
+  "dependencies": {
+    "child_process": "^1.0.2",
+    "crypto": "^1.0.1",
+    "fs": "^0.0.1-security",
+    "path": "^0.12.7"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/node": "^20.0.0",
+    "@types/webpack": "^5.28.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.4.0",
+    "typescript": "^5.9.2"
+  },
+  "files": [
+    "dist/",
+    "index.js",
+    "index.d.ts",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

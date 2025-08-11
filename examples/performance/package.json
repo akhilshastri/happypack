@@ -1,0 +1,16 @@
+{
+  "name": "rust-happypack-performance-example",
+  "version": "1.0.0",
+  "description": "Performance comparison examples for Rust HappyPack",
+  "scripts": {
+    "build:single": "CONFIG_TYPE=singleThread webpack --mode=development",
+    "build:multi": "CONFIG_TYPE=multiThread webpack --mode=development",
+    "build:cached": "CONFIG_TYPE=cached webpack --mode=development",
+    "benchmark": "npm run build:single && npm run build:multi && npm run build:cached",
+    "clean": "rm -rf dist .cache"
+  },
+  "devDependencies": {
+    "webpack": "^5.0.0",
+    "webpack-cli": "^5.0.0"
+  }
+}
