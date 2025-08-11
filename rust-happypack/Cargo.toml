@@ -1,0 +1,52 @@
+[package]
+name = "rust-happypack"
+version = "0.1.0"
+edition = "2021"
+authors = ["Devin AI <devin-ai-integration[bot]@users.noreply.github.com>"]
+description = "Rust-based parallel transpiler loader for webpack, inspired by HappyPack"
+license = "MIT"
+
+[[bin]]
+name = "rust-happypack-worker"
+path = "src/bin/worker.rs"
+
+[dependencies]
+# Basic transpilation (will be extended with SWC later)
+# Note: SWC integration will be added once version compatibility is resolved
+
+# Async runtime and concurrency
+tokio = { version = "1.0", features = ["full"] }
+rayon = "1.8"
+
+# Serialization and communication
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Error handling and utilities
+anyhow = "1.0"
+thiserror = "1.0"
+
+# Hashing for caching
+sha2 = "0.10"
+hex = "0.4"
+
+# File system operations
+walkdir = "2.4"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Cross-platform process communication
+crossbeam-channel = "0.5"
+
+# System utilities
+num_cpus = "1.16"
+uuid = { version = "1.6", features = ["v4", "serde"] }
+
+# Basic regex for simple transformations
+regex = "1.10"
+
+[dev-dependencies]
+tempfile = "3.8"
+criterion = "0.5"
