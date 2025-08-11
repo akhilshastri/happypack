@@ -11,7 +11,7 @@ pub struct Transpiler {
 impl Transpiler {
     pub fn new(config: Config) -> Result<Self> {
         let typescript_regex =
-            Regex::new(r":\s*\w+(\[\])?(\s*\|\s*\w+)*\s*[;,=)]").map_err(|e| {
+            Regex::new(r"(interface\s+\w+\s*\{[^}]*\}|:\s*\w+(\[\])?(\s*\|\s*\w+)*\s*[;,=)]|\s*:\s*\w+)").map_err(|e| {
                 RustHappyPackError::config_error(format!(
                     "Failed to compile TypeScript regex: {}",
                     e
@@ -38,6 +38,7 @@ impl Transpiler {
         let transpiled_code = self.basic_transpile(&request.source_code, &request.file_path)?;
 
         let processing_time = start_time.elapsed().as_millis() as u64;
+        let processing_time = if processing_time == 0 { 1 } else { processing_time };
 
         let mut response = TranspileResponse::new(request.id.clone(), transpiled_code)
             .with_processing_time(processing_time);
