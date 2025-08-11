@@ -28,10 +28,13 @@ async fn test_full_transpilation_workflow() {
         "integration-hash".to_string(),
     );
 
-    let response = pool.execute(move || {
-        let transpiler = crate::Transpiler::new(crate::Config::default()).unwrap();
-        transpiler.transpile_sync(&request)
-    }).await.unwrap();
+    let response = pool
+        .execute(move || {
+            let transpiler = crate::Transpiler::new(crate::Config::default()).unwrap();
+            transpiler.transpile_sync(&request)
+        })
+        .await
+        .unwrap();
 
     assert_eq!(response.id, "integration-test");
     assert!(!response.code.is_empty());
@@ -68,10 +71,13 @@ async fn test_jsx_transpilation_workflow() {
         "jsx-integration-hash".to_string(),
     );
 
-    let response = pool.execute(move || {
-        let transpiler = crate::Transpiler::new(crate::Config::default()).unwrap();
-        transpiler.transpile_sync(&request)
-    }).await.unwrap();
+    let response = pool
+        .execute(move || {
+            let transpiler = crate::Transpiler::new(crate::Config::default()).unwrap();
+            transpiler.transpile_sync(&request)
+        })
+        .await
+        .unwrap();
 
     assert_eq!(response.id, "jsx-integration-test");
     assert!(!response.code.is_empty());
@@ -93,10 +99,13 @@ async fn test_source_map_generation() {
     );
     request.source_maps = true;
 
-    let response = pool.execute(move || {
-        let transpiler = crate::Transpiler::new(crate::Config::default()).unwrap();
-        transpiler.transpile_sync(&request)
-    }).await.unwrap();
+    let response = pool
+        .execute(move || {
+            let transpiler = crate::Transpiler::new(crate::Config::default()).unwrap();
+            transpiler.transpile_sync(&request)
+        })
+        .await
+        .unwrap();
 
     assert_eq!(response.id, "sourcemap-integration-test");
     assert!(response.source_map.is_some());
@@ -127,17 +136,23 @@ async fn test_caching_workflow() {
 
     let request_clone = request.clone();
     let start_time = std::time::Instant::now();
-    let response1 = pool.execute(move || {
-        let transpiler = crate::Transpiler::new(crate::Config::default()).unwrap();
-        transpiler.transpile_sync(&request)
-    }).await.unwrap();
+    let response1 = pool
+        .execute(move || {
+            let transpiler = crate::Transpiler::new(crate::Config::default()).unwrap();
+            transpiler.transpile_sync(&request)
+        })
+        .await
+        .unwrap();
     let _first_duration = start_time.elapsed();
 
     let start_time = std::time::Instant::now();
-    let response2 = pool.execute(move || {
-        let transpiler = crate::Transpiler::new(crate::Config::default()).unwrap();
-        transpiler.transpile_sync(&request_clone)
-    }).await.unwrap();
+    let response2 = pool
+        .execute(move || {
+            let transpiler = crate::Transpiler::new(crate::Config::default()).unwrap();
+            transpiler.transpile_sync(&request_clone)
+        })
+        .await
+        .unwrap();
     let _second_duration = start_time.elapsed();
 
     assert_eq!(response1.code, response2.code);
@@ -176,7 +191,8 @@ async fn test_concurrent_transpilation() {
             pool.execute(move || {
                 let transpiler = crate::Transpiler::new(crate::Config::default()).unwrap();
                 transpiler.transpile_sync(&request)
-            }).await
+            })
+            .await
         });
         handles.push(handle);
     }
@@ -209,10 +225,12 @@ async fn test_error_handling() {
         "error-hash".to_string(),
     );
 
-    let result = pool.execute(move || {
-        let transpiler = crate::Transpiler::new(crate::Config::default()).unwrap();
-        transpiler.transpile_sync(&request)
-    }).await;
+    let result = pool
+        .execute(move || {
+            let transpiler = crate::Transpiler::new(crate::Config::default()).unwrap();
+            transpiler.transpile_sync(&request)
+        })
+        .await;
     assert!(result.is_ok());
 }
 
@@ -251,10 +269,13 @@ async fn test_large_file_transpilation() {
     );
 
     let start_time = std::time::Instant::now();
-    let response = pool.execute(move || {
-        let transpiler = crate::Transpiler::new(crate::Config::default()).unwrap();
-        transpiler.transpile_sync(&request)
-    }).await.unwrap();
+    let response = pool
+        .execute(move || {
+            let transpiler = crate::Transpiler::new(crate::Config::default()).unwrap();
+            transpiler.transpile_sync(&request)
+        })
+        .await
+        .unwrap();
     let duration = start_time.elapsed();
 
     assert_eq!(response.id, "large-file-test");
@@ -291,10 +312,13 @@ async fn test_different_file_types() {
             format!("filetype-hash-{}", i),
         );
 
-        let response = pool.execute(move || {
-            let transpiler = crate::Transpiler::new(crate::Config::default()).unwrap();
-            transpiler.transpile_sync(&request)
-        }).await.unwrap();
+        let response = pool
+            .execute(move || {
+                let transpiler = crate::Transpiler::new(crate::Config::default()).unwrap();
+                transpiler.transpile_sync(&request)
+            })
+            .await
+            .unwrap();
 
         assert_eq!(response.id, format!("filetype-test-{}", i));
         assert!(!response.code.is_empty());
